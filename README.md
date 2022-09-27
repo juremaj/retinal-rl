@@ -1,4 +1,4 @@
-## Current Installation Procedure
+## Installation Procedure
 
 Here are the steps I'm currently going through to get the `retinal-rl` project working. First [install anaconda or miniconda](https://docs.anaconda.com/anaconda/install/index.html), and then create the environment
 ``` bash
