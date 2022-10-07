@@ -73,5 +73,3 @@ Finally, when training a model there are a number of additional parameters for c
 
 - `--hidden_size`: The size of the hidden/latent state used to represent the RL problem.
 - `--num_workers`: This is the number of simulation threads to run. This shouldn't be more than the number of cores on the CPU, and can be less if the simulation is GPU bottlenecked.
-- `--num_envs_per_worker`: This is the number of environments to simulate per thread. This should be adjusted. `24` seems good.
-- `--batch_size`: Also manages per worker load. Try `4096`.

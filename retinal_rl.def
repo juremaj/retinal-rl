@@ -43,4 +43,4 @@ From: ubuntu:22.04
     pip3 install sample-factory
 
     # retinal-rl Extra
-    pip3 install matplotlib pyglet imageio opentsne pygifsicle
+    pip3 install matplotlib pyglet imageio opentsne pygifsicle ipython
