@@ -9,6 +9,7 @@ train_dir
 
 # Nohup log (when running in background on compute servers)
 nohup*.out
+log_train*.out
 
 # C extensions
 *.so
@@ -85,8 +86,13 @@ target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
-analyze_jm.ipynb
+dev_jm*
 classify*
+
+# dev 
+retinal_rl/helpers*
+retinal_rl/analyze*
+retinal_rl/plot*
 
 # IPython
 profile_default/
