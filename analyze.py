@@ -5,7 +5,7 @@ from retinal_rl.encoders import register_encoders
 from retinal_rl.parameters import custom_parse_args
 
 from retinal_rl.activations import get_env_ac, simulate, load_sim_out, get_acts_dataset
-from retinal_rl.plot import save_simulation_gif, plot_all_rf, plot_acts_tsne_stim, plot_dimred_ds_acts
+from retinal_rl.visualization import save_simulation_gif, plot_all_rf, plot_acts_tsne_stim, plot_dimred_ds_acts
 
 def analyze(cfg):
     env, actor_critic = get_env_ac(cfg)
