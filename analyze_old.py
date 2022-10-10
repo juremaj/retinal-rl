@@ -6,8 +6,8 @@ import torch
 import numpy as np
 
 # retinal-rl
-from retinal_rl.visualization import *
-from retinal_rl.activations import *
+from retinal_rl.visualization_old import *
+from retinal_rl.activations_old import *
 
 
 def analyze(cfg):
@@ -38,17 +38,12 @@ def analyze(cfg):
         plot_tsne_env(cfg, all_acts_dict_enc)
 
     if cfg.analyze_acts == 'dataset':
-        
-        if cfg.analyze_ds_name == 'CIFAR':
-            rewards_dict = {0:2, 1:1, 2:4, 3:5, 4:7, 5:6, 6:8, 7:9, 8:3, 9:0} # defined by the class-reward assignments in the .wad file
-        elif cfg.analyze_ds_name == 'MNIST':
-            rewards_dict = {0:0, 1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:9} # defined by the class-reward assignments in the .wad file (matching digits in case of mnist)
 
-        all_acts_dict_ds = get_acts_dataset(cfg, enc, rewards_dict)
+        all_acts_dict_ds = get_acts_dataset(cfg, enc)
         plot_dimred_ds(cfg, all_acts_dict_ds['all_fc_act'], all_acts_dict_ds['all_lab'])
         
         # TODO: add function for classifier analysis
-        
+
     
     elif cfg.analyze_acts != 'False':  # if anything other than 'False', 'environment', 'mnist' or 'cifar'
         print('\n\nInvalid cfg.analyze_acts input, terminating script.\n\n')
