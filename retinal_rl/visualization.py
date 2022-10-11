@@ -33,8 +33,13 @@ def save_receptive_fields_plot(cfg,device,enc,lay,env):
     for key, x in obs_torch.items():
         obs_torch[key] = torch.from_numpy(x).to(device).float()
     
-    isz = list(obs_torch['obs'].size())[1:]
-    outmtx = enc.conv_head[0:(lay*2)](obs_torch['obs'])
+    if cfg.encoder_custom=='greyscale_lindsey':
+        obs = obs_torch['obs'][:,0,None,:,:] # setting shape of observation to be only single channel
+    else:
+        obs = obs_torch['obs']
+
+    isz = list(obs.size())[1:]
+    outmtx = enc.conv_head[0:(lay*2)](obs)
     osz = list(outmtx.size())[1:]
 
     nchns = isz[0]
@@ -64,7 +69,14 @@ def save_receptive_fields_plot(cfg,device,enc,lay,env):
 
                 # Plotting statistics
                 rw = k + j*nchns
-                ax = axs[rw,i] if flts > 1 else axs[rw]
+
+                if flts > 1 and nchns*rwsmlt > 1:
+                    ax = axs[rw,i]
+                elif flts <= 1 and nchns*rwsmlt > 1:
+                    ax = axs[rw]
+                elif flts > 1 and nchns*rwsmlt <= 1:
+                    ax = axs[i]
+
                 ax.set_axis_off()
                 pnl = ax.imshow(avg[k,:,:],vmin=-vmx,vmax=vmx)
                 cbar = fig.colorbar(pnl, ax=ax)
