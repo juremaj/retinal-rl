@@ -44,10 +44,6 @@ IPython might also be necessary:
 ```bash
 conda install -c conda-forge ipython
 ```
-Finally, if you're missing some fundamental libraries, the following may help:
-```bash
-conda install -c conda-forge gxx boost
-```
 
 ### Docker
 
