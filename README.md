@@ -25,6 +25,7 @@ pip install sample-factory
 pip install vizdoom
 ```
 Note, you may require `sample-factory=1.121.4` on a server. To avoid using an older version, a possible workaround is also to install pytorch via `conda install pytorch torchvision torchaudio cudatoolkit=11.6 -c pytorch -c conda-forge` and downgrade the `gym` library: `pip install gym==0.25.2`
+
 We'll also need some other tools and libraries
 ```bash
 conda install -c conda-forge matplotlib pyglet imageio
