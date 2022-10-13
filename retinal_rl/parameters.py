@@ -54,6 +54,12 @@ def custom_parse_args(argv=None, evaluation=False):
             action.default = 0.1
         elif action.dest == 'encoder_custom':
             action.default = 'lindsey'
+        elif action.dest == 'with_wandb':
+            action.default = 'True'
+        elif action.dest == 'wandb_user':
+            action.default = 'jmajnik'
+        elif action.dest == 'wandb_tags':
+            action.default = ['test', 'benchmark', 'doom', 'appo']
 
     # for analyze script
     parser.add_argument('--analyze_acts', type=str, default='False', help='Visualize activations via gifs and dimensionality reduction; options: \'environment\', \'mnist\' or \'cifar\'') # specific for analyze.py

@@ -3,6 +3,7 @@ import imageio
 import numpy as np
 import torch
 from torch.utils import tensorboard
+import wandb
 
 
 from sample_factory.utils.utils import AttrDict
@@ -25,6 +26,10 @@ def save_simulation_gif(cfg, all_img):
 
     optimize(pth)
 
+    # displaying in WandB
+    if cfg.with_wandb:
+        wandb.init(name=cfg.experiment, project='sample_factory', group='rfs')
+        wandb.log({"video": wandb.Video(pth, fps=35, format="gif")})
 
 def save_receptive_fields_plot(cfg,device,enc,lay,env):
     
@@ -93,6 +98,11 @@ def save_receptive_fields_plot(cfg,device,enc,lay,env):
     writer = tensorboard.SummaryWriter(pth_tb)
     writer.add_figure(f"rf-conv{lay}", fig, close=False) # only show the latest rfs in tb (for comparison across models)
     writer.close()
+
+    # displaying in WandB
+    if cfg.with_wandb:
+        wandb.init(name=cfg.experiment, project='sample_factory', group='rfs')
+        wandb.log({f"rf-conv{lay}": fig})
 
     # saving
     pth = cfg.train_dir +  "/" + cfg.experiment + f"/rf-conv{lay}_" + t_stamp + ".png"
@@ -170,7 +180,7 @@ def plot_acts_tsne_stim(cfg, acts, health, title):
     neg_col = np.where(np.sign(get_stim_coll(health)) == -1)
     
     # plot
-    plt.figure(figsize=(10,3), dpi = 400)
+    fig = plt.figure(figsize=(10,3), dpi = 400)
     plt.imshow(data, cmap='bwr', interpolation='nearest', aspect='auto', vmin=-4, vmax=4)
     plt.vlines(pos_col, 0, data.shape[0], color='grey', linewidth=0.3, linestyle='--')
     plt.vlines(neg_col, 0, data.shape[0], color='black', linewidth=0.3, linestyle=':')
@@ -178,6 +188,11 @@ def plot_acts_tsne_stim(cfg, acts, health, title):
     plt.ylabel(f'{title} unit id.')
     plt.title(f'Activations of {title} neurons')
     
+    # displaying in WandB
+    if cfg.with_wandb:
+        wandb.init(name=cfg.experiment, project='sample_factory', group='rfs')
+        wandb.log({f"acts_tsne_{title}_sim": fig})
+
     # saving
     t_stamp =  str(np.datetime64('now')).replace('-','').replace('T','_').replace(':', '')
     pth = cfg.train_dir +  "/" + cfg.experiment + f"/acts_tsne_{title}_sim_" + t_stamp + ".png"

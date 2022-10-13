@@ -148,6 +148,9 @@ dmypy.json
 # core files
 core*
 
+# weights and biases
+wandb
+
 # downloaded data
 data/obsolete*
 data/cifar*
