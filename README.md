@@ -10,21 +10,29 @@ The `apptainer` image is self-contained, and building it should immediately allo
 
 Here are the steps to get a `retinal-rl` environment setup in `conda`, which should work on bare metal. First [install anaconda or miniconda](https://docs.anaconda.com/anaconda/install/index.html), and then create the environment
 ``` bash
-conda create --name retinal-rl python=3.8 pip
+conda create --name retinal-rl pip
 conda activate retinal-rl
 ```
 I'm using `miniconda`, so some of the following commands might be redundant if you're using `anaconda`.
 
-Now, we use the LTS version of `pytorch` to maximize compatibility
+Next, we install `pytorch`
 ```bash
-conda install pytorch torchvision torchaudio cudatoolkit=11.1 -c pytorch-lts -c nvidia
+conda install pytorch torchvision torchaudio cudatoolkit=11.6 -c pytorch -c conda-forge
 ```
 and then install `sample-factory` and `vizdoom`
 ```bash
 pip install sample-factory
 pip install vizdoom
 ```
-Note, you may require `sample-factory=1.121.4` on a server. To avoid using an older version, a possible workaround is also to install pytorch via `conda install pytorch torchvision torchaudio cudatoolkit=11.6 -c pytorch -c conda-forge` and downgrade the `gym` library: `pip install gym==0.25.2`
+Note, you may require `sample-factory=1.121.4` on a server. You may also want to downgrade the `gym` library with `pip install gym==0.25.2`
+
+For `vizdoom`, `pip install` can sometimes fail when run inside a `conda` environment. In this case the solution is to build `vizdoom` directly by running
+```bash
+conda install -c conda-forge boost cmake gtk2 sdl2
+git clone https://github.com/mwydmuch/ViZDoom.git --recurse-submodules
+cd ViZDoom
+python setup.py build && python setup.py install
+```
 
 We'll also need some other tools and libraries
 ```bash
@@ -35,10 +43,6 @@ pip install openTSNE
 IPython might also be necessary:
 ```bash
 conda install -c conda-forge ipython
-```
-Finally, if you're missing some fundamental libraries, the following may help:
-```bash
-conda install -c conda-forge gxx boost
 ```
 
 ### Docker
