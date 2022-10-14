@@ -5,7 +5,7 @@ from retinal_rl.encoders import register_encoders
 from retinal_rl.parameters import custom_parse_args
 
 from retinal_rl.activations import get_env_ac, simulate, load_sim_out, get_acts_dataset
-from retinal_rl.visualization import save_simulation_gif, plot_all_rf, plot_acts_tsne_stim, plot_dimred_ds_acts
+from retinal_rl.visualization import save_simulation_gif, plot_all_rf, plot_acts_tsne_stim, plot_dimred_ds_acts, plot_dimred_sim_acts
 
 def analyze(cfg):
     env, actor_critic = get_env_ac(cfg)
@@ -20,6 +20,9 @@ def analyze(cfg):
 
     plot_acts_tsne_stim(cfg, sim_out['all_fc_act'], sim_out['all_health'], title='FC')
     plot_acts_tsne_stim(cfg, sim_out['all_rnn_act'], sim_out['all_health'], title='RNN')
+    
+    plot_dimred_sim_acts(cfg, sim_out['all_fc_act'], title='FC')
+    plot_dimred_sim_acts(cfg, sim_out['all_rnn_act'], title='RNN')
 
     if cfg.analyze_acts == 'dataset':
         ds_out = get_acts_dataset(cfg, actor_critic)

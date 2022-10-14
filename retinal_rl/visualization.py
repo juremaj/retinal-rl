@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from torch.utils import tensorboard
 import wandb
-
+from sklearn.decomposition import PCA
 
 from sample_factory.utils.utils import AttrDict
 from sample_factory.algorithms.appo.actor_worker import transform_dict_observations
@@ -166,7 +166,16 @@ def fit_tsne(data):
     tsne_emb = tsne.fit(data.T)
     return tsne_emb
 
-def plot_acts_tsne_stim(cfg, acts, health, title):
+def fit_pca(data):
+    print('fitting PCA...')
+    pca=PCA()
+    pca.fit(data)
+    embedding = pca.components_.T
+    var_exp = pca.explained_variance_ratio_
+    return embedding, var_exp
+
+# for simulated experience
+def plot_acts_tsne_stim(cfg, acts, health, title): # plot sorted activations
        
     # zscore
     data=row_zscore(acts)
@@ -191,11 +200,11 @@ def plot_acts_tsne_stim(cfg, acts, health, title):
     # displaying in WandB
     if cfg.with_wandb:
         wandb.init(name=cfg.experiment, project='sample_factory', group='rfs')
-        wandb.log({f"acts_tsne_{title}_sim": fig})
+        wandb.log({f"acts_sorted_tsne_{title}_sim": fig})
 
     # saving
     t_stamp =  str(np.datetime64('now')).replace('-','').replace('T','_').replace(':', '')
-    pth = cfg.train_dir +  "/" + cfg.experiment + f"/acts_tsne_{title}_sim_" + t_stamp + ".png"
+    pth = cfg.train_dir +  "/" + cfg.experiment + f"/acts_sorted_tsne_{title}_sim_" + t_stamp + ".png"
     plt.savefig(pth)
 
 def get_stim_coll(all_health, health_dep=-8, death_dep=30):
@@ -210,6 +219,8 @@ def get_stim_coll(all_health, health_dep=-8, death_dep=30):
 def row_zscore(mat):
     return (mat - np.mean(mat,1)[:,np.newaxis])/(np.std(mat,1)[:,np.newaxis]+1e-8)
 
+
+# for dataset inputs
 def plot_dimred(cfg, embedding, c, title='embedding'):
     fig = plt.figure(figsize=(20,20))
     plt.scatter(embedding[:,0],embedding[:,1], s=5, c=c, cmap='jet')
@@ -218,9 +229,29 @@ def plot_dimred(cfg, embedding, c, title='embedding'):
     
     # saving
     t_stamp =  str(np.datetime64('now')).replace('-','').replace('T','_').replace(':', '')
-    pth = cfg.train_dir +  "/" + cfg.experiment + f"/acts_tsne_FC_ds_" + t_stamp + ".png"
+    pth = cfg.train_dir +  "/" + cfg.experiment + f"/acts_{title}_" + t_stamp + ".png"
     plt.savefig(pth)
 
-def plot_dimred_ds_acts(cfg, all_fc_act, all_lab):
-    tsne_emb = fit_tsne(all_fc_act)
-    plot_dimred(cfg, tsne_emb, all_lab)
+    # displaying in WandB
+    if cfg.with_wandb:
+        wandb.init(name=cfg.experiment, project='sample_factory', group='rfs')
+        wandb.log({f"acts_{title}": wandb.Image(pth)})
+
+def plot_dimred_ds_acts(cfg, data, all_lab):
+    
+    tsne_emb = fit_tsne(data)
+    plot_dimred(cfg, tsne_emb, all_lab, title='tsne_FC_ds')
+
+    pca_emb,_ = fit_pca(data)
+    plot_dimred(cfg, pca_emb, all_lab, title='pca_FC_ds')
+
+# for simulation
+def plot_dimred_sim_acts(cfg, data, title=''):
+    
+    t = np.arange(data.shape[1])
+
+    tsne_emb = fit_tsne(data)
+    plot_dimred(cfg, tsne_emb, t, title=f'tsne_{title}_sim')
+
+    pca_emb,_ = fit_pca(data)
+    plot_dimred(cfg, pca_emb, t, title=f'pca_{title}_sim')
