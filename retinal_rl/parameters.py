@@ -57,7 +57,7 @@ def custom_parse_args(argv=None, evaluation=False):
         elif action.dest == 'with_wandb':
             action.default = 'True'
         elif action.dest == 'wandb_user':
-            action.default = 'jmajnik'
+            action.default = 'juremaj'
         elif action.dest == 'wandb_tags':
             action.default = ['test', 'benchmark', 'doom', 'appo']
 
