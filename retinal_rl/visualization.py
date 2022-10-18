@@ -81,6 +81,8 @@ def save_receptive_fields_plot(cfg,device,enc,lay,env):
                     ax = axs[rw]
                 elif flts > 1 and nchns*rwsmlt <= 1:
                     ax = axs[i]
+                else:
+                    ax=axs
 
                 ax.set_axis_off()
                 pnl = ax.imshow(avg[k,:,:],vmin=-vmx,vmax=vmx)
