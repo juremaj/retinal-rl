@@ -2,7 +2,6 @@
 retina_rl library
 
 """
-
 from torch import nn
 from torchvision.transforms import Grayscale
 
@@ -71,14 +70,23 @@ class LindseyEncoderBase(EncoderBase):
         krnsz = cfg.kernel_size
         retstrd = cfg.retinal_stride # only for first conv layer
 
-        self.nl_fc = nonlinearity(cfg)
+        if not cfg.linear_encoder: # choosing activation function (non-linear vs linear)
+            self.nl_fc = nonlinearity(cfg)
+        elif cfg.linear_encoder:
+            self.nl_fc = nn.Identity(inplace=True)
+
         self.kernel_size = krnsz
 
         # Preparing Conv Layers
         conv_layers = []
         self.nls = []
         for i in range(vvsdpth+2): # +2 for the first 'retinal' layers
-            self.nls.append(nonlinearity(cfg))
+            
+            if not cfg.linear_encoder: # choosing activation function (non-linear vs linear)
+                self.nls.append(nonlinearity(cfg))
+            elif cfg.linear_encoder:
+                self.nls.append(nn.Identity(inplace=True))
+            
             if i == 0: # 'bipolar cells' ('global channels')
                 conv_layers.extend([nn.Conv2d(3, nchns, krnsz, stride=retstrd), self.nls[i]])
             elif i == 1: # 'ganglion cells' ('retinal bottleneck')
@@ -107,6 +115,7 @@ class LindseyEncoder(LindseyEncoderBase):
 
         super().__init__(cfg,obs_space,timing)
         self.base_encoder = LindseyEncoderBase(cfg,obs_space,timing)
+        print(self)
 
     def forward(self, obs_dict):
         # we always work with dictionary observations. Primary observation is available with the key 'obs'

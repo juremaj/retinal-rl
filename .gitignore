@@ -89,6 +89,10 @@ target/
 dev_jm*
 classify*
 
+# large scenarios files 
+scenarios/appcifar*
+scenarios/apple_gathering_hr100_r30_b2_g100*
+
 # dev 
 retinal_rl/helpers*
 retinal_rl/analyze*

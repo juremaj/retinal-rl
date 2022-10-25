@@ -45,7 +45,8 @@ def custom_parse_args(argv=None, evaluation=False):
     parser.add_argument('--kernel_size', type=int, default=7, help='Size of CNN filters')
     parser.add_argument('--retinal_stride', type=int, default=2, help='Stride at the first conv layer (\'BC\'), doesnt apply to \'VVS\'')
     parser.add_argument('--rf_ratio', type=int, default=3, help='Ratio between RFs of first (\'BC\') and second (\'RGC\') convolutional layer in Mosaic network')
-    
+    parser.add_argument('--linear_encoder', type=bool, default=False, help='Remove/Replace the default activation function with linear (nn.Identity)')
+
     # changing some default arguments
     for action in parser._actions:
         if action.dest == 'hidden_size':
