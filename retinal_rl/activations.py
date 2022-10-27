@@ -16,6 +16,9 @@ from sample_factory.algorithms.appo.learner import LearnerWorker
 from sample_factory.algorithms.appo.model_utils import get_hidden_size
 from sample_factory.algorithms.appo.actor_worker import transform_dict_observations
 
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+
 # getting environment and actor critic from checkpoint
 
 def make_env_func(cfg, env_config):
@@ -168,6 +171,36 @@ def get_acts_dataset(cfg, actor_critic):
                    'all_lab':all_lab}
     
     return analyze_ds_out
+
+## linear decoder analysis
+def get_class_accuracy(cfg, ds_out, mode='multi', thr=5, permute=False):
+    # mode can be 'multi' or 'bin', thr determines threshold for binarisation, permute will randomly shuffle labels (to get chance preformance)
+    
+    X = ds_out['all_fc_act'].T
+    
+    if mode == 'multi':
+        y = ds_out['all_lab']
+    elif mode == 'bin':
+        y = ds_out['all_lab']<thr
+        
+    perm_str = '' if not permute else 'permuted '
+    
+    if permute:
+        y = np.random.permutation(y)
+        
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+
+    logreg = LogisticRegression(max_iter=10000)
+    logreg.fit(X_train, y_train)
+    
+    score_train = logreg.score(X_train, y_train)
+    score_test = logreg.score(X_test, y_test)
+    
+    out_str = f'{perm_str}{mode} classification scores:\n  -Train: {np.round(score_train,4)}\n  -Test: {np.round(score_test,4)}\n\n'
+    print(out_str) # ADD SAVING THIS STRING
+    
+    with open(f'train_dir/{cfg.experiment}/analyze_class_score.txt', 'a') as f:
+        f.writelines(out_str)
 
 def obs_to_img(obs):
     img = np.array(obs[0]).astype(np.uint8)
