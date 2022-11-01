@@ -19,7 +19,7 @@ def retinal_override_defaults(env, parser):
     """RL params specific to retinal envs."""
     parser.set_defaults(
         encoder_custom='lindsey',
-        hidden_size=512,
+        hidden_size=64,
         ppo_clip_value=0.2,  # value used in all experiments in the paper
         obs_subtract_mean=0.0,
         obs_scale=255.0,
@@ -29,6 +29,10 @@ def retinal_override_defaults(env, parser):
         num_envs_per_worker=20,
         batch_size=4096,
         exploration_loss_coeff=0.001,
+        reward_scale=0.1,
+        with_wandb='True',
+        wandb_tags=['retinal_rl','appo'],
+        wandb_project="retinal_rl"
     )
 def custom_parse_args(argv=None, evaluation=False):
     """
@@ -45,22 +49,10 @@ def custom_parse_args(argv=None, evaluation=False):
     parser.add_argument('--kernel_size', type=int, default=7, help='Size of CNN filters')
     parser.add_argument('--retinal_stride', type=int, default=2, help='Stride at the first conv layer (\'BC\'), doesnt apply to \'VVS\'')
     parser.add_argument('--rf_ratio', type=int, default=3, help='Ratio between RFs of first (\'BC\') and second (\'RGC\') convolutional layer in Mosaic network')
-    parser.add_argument('--linear_encoder', type=bool, default=False, help='Remove/Replace the default activation function with linear (nn.Identity)')
-
-    # changing some default arguments
-    for action in parser._actions:
-        if action.dest == 'hidden_size':
-            action.default = 64
-        elif action.dest == 'reward_scale':
-            action.default = 0.1
-        elif action.dest == 'encoder_custom':
-            action.default = 'lindsey'
-        elif action.dest == 'with_wandb':
-            action.default = 'True'
-        elif action.dest == 'wandb_user':
-            action.default = 'juremaj'
-        elif action.dest == 'wandb_tags':
-            action.default = ['test', 'benchmark', 'doom', 'appo']
+    parser.add_argument( "--activation", default="elu" , choices=["elu", "relu", "tanh", "linear"]
+                        , type=str, help="Type of activation function to use.")
+    parser.add_argument("--greyscale", default=False, type=bool
+                        , help="Whether to greyscale the input image.")
 
     # for analyze script
     parser.add_argument('--analyze_acts', type=str, default='False', help='Visualize activations via gifs and dimensionality reduction; options: \'environment\', \'mnist\' or \'cifar\'') # specific for analyze.py

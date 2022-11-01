@@ -70,10 +70,7 @@ class LindseyEncoderBase(EncoderBase):
         krnsz = cfg.kernel_size
         retstrd = cfg.retinal_stride # only for first conv layer
 
-        if not cfg.linear_encoder: # choosing activation function (non-linear vs linear)
-            self.nl_fc = nonlinearity(cfg)
-        elif cfg.linear_encoder:
-            self.nl_fc = nn.Identity(inplace=True)
+        self.nl_fc = nonlinearity(cfg)
 
         self.kernel_size = krnsz
 
@@ -81,12 +78,9 @@ class LindseyEncoderBase(EncoderBase):
         conv_layers = []
         self.nls = []
         for i in range(vvsdpth+2): # +2 for the first 'retinal' layers
-            
-            if not cfg.linear_encoder: # choosing activation function (non-linear vs linear)
-                self.nls.append(nonlinearity(cfg))
-            elif cfg.linear_encoder:
-                self.nls.append(nn.Identity(inplace=True))
-            
+
+            self.nls.append(nonlinearity(cfg))
+
             if i == 0: # 'bipolar cells' ('global channels')
                 conv_layers.extend([nn.Conv2d(3, nchns, krnsz, stride=retstrd), self.nls[i]])
             elif i == 1: # 'ganglion cells' ('retinal bottleneck')
@@ -168,7 +162,7 @@ class GreyscaleLindseyEncoderBase(EncoderBase):
         # we always work with dictionary observations. Primary observation is available with the key 'obs'
         gs = Grayscale(num_output_channels=1) # change compared to vanilla Lindsey
         x = gs.forward(x) # change compared to vanilla Lindsey
-        
+
         x = self.conv_head(x)
         x = x.contiguous().view(-1, self.conv_head_out_size)
         x = self.nl_fc(self.fc1(x))
@@ -204,15 +198,15 @@ class MosaicEncoderBase(EncoderBase):
         # bc layer architecture
         krnsz1 = cfg.kernel_size
         strd1 = krnsz1 # mosaic in conv1 (stride has to be the same as kernel)
-        
+
         # rgc layer architecture
         krnsz2 = cfg.rf_ratio # 'how many bcs will one rgc pool'
         strd2 = krnsz2
-        
+
         # v1/vvs layer architecture
         krnszv = cfg.rf_ratio # TODO: think of good ratio for V1
         strdv = 1 # there is no mosaic in V1 or higher areas
-        
+
         self.nl_fc = nonlinearity(cfg)
         self.kernel_size = krnsz1 # might be redundant also in lindsey implementation
 
