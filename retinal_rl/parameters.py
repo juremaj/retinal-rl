@@ -26,7 +26,7 @@ def retinal_override_defaults(env, parser):
         env_frameskip=4,
         fps=35,
         exploration_loss='symmetric_kl',
-        num_envs_per_worker=20,
+        num_envs_per_worker=10,
         batch_size=2048,
         exploration_loss_coeff=0.001,
         reward_scale=0.1,

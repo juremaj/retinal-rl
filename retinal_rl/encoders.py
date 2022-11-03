@@ -12,7 +12,7 @@ from sample_factory.algorithms.utils.pytorch_utils import calc_num_elements
 ### Utils ###
 
 
-def activation(cfg) -> nn.Module:
+def activator(cfg) -> nn.Module:
     if cfg.activation == "elu":
         return nn.ELU(inplace=True)
     elif cfg.activation == "relu":
@@ -39,10 +39,11 @@ class LindseyEncoderBase(EncoderBase):
         self.kernel_size = cfg.kernel_size
         self.gsbl = cfg.greyscale
         self.encoder_out_size = cfg.hidden_size
+        self.activation = activator(cfg)
 
         # Preparing Network
 
-        self.nl_fc = activation(cfg)
+        self.nl_fc = self.activation
 
         indm = 3
         if self.gsbl: indm = 1
@@ -54,20 +55,17 @@ class LindseyEncoderBase(EncoderBase):
         krnsz = self.kernel_size
 
         conv_layers = []
-        self.nls = []
 
         for i in range(vvsdpth+2): # +2 for the first 'retinal' layers
 
-            self.nls.append(activation(cfg))
-
             if i == 0: # 'bipolar cells' ('global channels')
-                conv_layers.extend([nn.Conv2d(indm, nchns, krnsz, stride=retstrd), self.nls[i]])
+                conv_layers.extend([nn.Conv2d(indm, nchns, krnsz, stride=retstrd), self.activation])
             elif i == 1: # 'ganglion cells' ('retinal bottleneck')
-                conv_layers.extend([nn.Conv2d(nchns, btlchns, krnsz, stride=1), self.nls[i]])
+                conv_layers.extend([nn.Conv2d(nchns, btlchns, krnsz, stride=1), self.activation])
             elif i == 2: # 'V1' ('global channels')
-                conv_layers.extend([nn.Conv2d(btlchns, nchns, krnsz, stride=1), self.nls[i]])
+                conv_layers.extend([nn.Conv2d(btlchns, nchns, krnsz, stride=1), self.activation])
             else: # 'vvs layers'
-                conv_layers.extend([nn.Conv2d(nchns, nchns, krnsz, stride=1), self.nls[i]])
+                conv_layers.extend([nn.Conv2d(nchns, nchns, krnsz, stride=1), self.activation])
 
         # Storing network
         self.conv_head = nn.Sequential(*conv_layers)
