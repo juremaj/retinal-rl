@@ -134,7 +134,7 @@ def load_sim_out(cfg):
 
 def get_acts_dataset(cfg, actor_critic):
 
-    bck_np = np.load(os.getcwd() + '/data/doom_pad.npy') # saved 'doom-looking' background
+    bck_np = np.load(os.getcwd() + '/misc/data/doom_pad.npy') # saved 'doom-looking' background
     
     if cfg.analyze_ds_name == 'CIFAR':
         trainset = datasets.CIFAR10(root='./data', train=True, download=True, transform=None)
