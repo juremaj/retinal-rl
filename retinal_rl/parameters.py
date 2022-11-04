@@ -43,7 +43,7 @@ def custom_parse_args(argv=None, evaluation=False):
     parser = arg_parser(argv, evaluation=evaluation)
 
     # Parse args for rvvs model from Lindsey et al 2019
-    parser.add_argument('--global_channels', type=int, default=16, help='Standard number of channels in CNN layers')
+    parser.add_argument('--global_channels', type=int, default=32, help='Standard number of channels in CNN layers')
     parser.add_argument('--retinal_bottleneck', type=int, default=4, help='Number of channels in retinal bottleneck')
     parser.add_argument('--vvs_depth', type=int, default=1, help='Number of CNN layers in the ventral stream network')
     parser.add_argument('--kernel_size', type=int, default=7, help='Size of CNN filters')
