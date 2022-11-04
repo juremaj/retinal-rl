@@ -38,7 +38,7 @@ def save_receptive_fields_plot(cfg,device,enc,lay,env):
     for key, x in obs_torch.items():
         obs_torch[key] = torch.from_numpy(x).to(device).float()
     
-    if cfg.encoder_custom=='greyscale_lindsey':
+    if cfg.greyscale:
         obs = obs_torch['obs'][:,0,None,:,:] # setting shape of observation to be only single channel
     else:
         obs = obs_torch['obs']
