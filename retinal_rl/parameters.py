@@ -51,14 +51,14 @@ def custom_parse_args(argv=None, evaluation=False):
     parser.add_argument('--rf_ratio', type=int, default=3, help='Ratio between RFs of first (\'BC\') and second (\'RGC\') convolutional layer in Mosaic network')
     parser.add_argument( "--activation", default="elu" , choices=["elu", "relu", "tanh", "linear"]
                         , type=str, help="Type of activation function to use.")
-    parser.add_argument("--greyscale", default=False, type=bool
+    parser.add_argument("--greyscale", default=False, type=str2bool
                         , help="Whether to greyscale the input image.")
 
     # for analyze script
     parser.add_argument('--analyze_acts', type=str, default='False', help='Visualize activations via gifs and dimensionality reduction; options: \'environment\', \'mnist\' or \'cifar\'') # specific for analyze.py
     parser.add_argument('--analyze_max_num_frames', type=int, default=1e3, help='Used for visualising \'environment\' activations (leave as defult otherwise), normally 100000 works for a nice embedding, but can take time') # specific for analyze.py
     parser.add_argument('--analyze_ds_name', type=str, default='CIFAR', help='Used for visualizing responses to dataset (can be \'MNIST\' or \'CIFAR\'') # specific for analyze.py
-    parser.add_argument('--shape_reward', type=bool, default=True, help='Turns on reward shaping')
+    parser.add_argument('--shape_reward', type=str2bool, default=True, help='Turns on reward shaping')
 
     # SampleFactory parse_args function does some additional processing (see comments there)
     cfg = parse_args(argv=argv, evaluation=evaluation, parser=parser)
