@@ -10,6 +10,7 @@ from sample_factory.utils.utils import AttrDict
 from sample_factory.algorithms.appo.actor_worker import transform_dict_observations
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 from openTSNE import TSNE
 
@@ -257,3 +258,56 @@ def plot_dimred_sim_acts(cfg, data, title=''):
 
     pca_emb,_ = fit_pca(data)
     plot_dimred(cfg, pca_emb, t, title=f'pca_{title}_sim')
+    
+def save_activations_gif(cfg, imgs, conv_acts, lay, vscale=100): 
+
+    snapshots = np.asarray(conv_acts[lay])
+    fps = 30
+    nSeconds = round(len(snapshots)//fps)
+
+    nflts = snapshots[0].shape[2]
+    rwsmlt = 2 if nflts > 8 else 1 # number of rows 
+    fltsdv = nflts//rwsmlt + 1 # numer of clumns (+ 1 for rgb image)
+    
+    fig, axs = plt.subplots(rwsmlt,fltsdv,dpi=1, figsize=(128*fltsdv, 72*rwsmlt))
+    
+    ims = []
+    vmaxs = [abs(snapshots[:,:,:,i]).max() for i in range(nflts)]
+    
+    print(f'Visualising activations for conv{lay+1}')
+    for t in range(fps*nSeconds):
+        pts = []
+        ax = axs[0,0] if rwsmlt>1 else axs[0]
+        im = ax.imshow(imgs[:,:,:,t], interpolation='none', aspect='auto', vmin=-vscale, vmax=vscale)
+        ax.axis('off')
+        ax = axs[1,0] if rwsmlt>1 else axs[0]
+        ax.axis('off')
+        pts.append(im)
+        
+        flt=0 # counter
+        for i in range(fltsdv-1):
+            for j in range(rwsmlt):
+                
+                ax = axs[j, i+1] if rwsmlt>1 else axs[i+1]
+                im = ax.imshow(snapshots[t,:,:,flt], interpolation='none', aspect='auto', cmap='bwr', vmin=-vmaxs[j], vmax=vmaxs[j]) # plotting activations
+                flt +=1
+                ax.axis('off')
+                pts.append(im)
+        ims.append(pts)
+        if t % (fps*10) == 0:
+            print('Progress: ', t//fps, '/', nSeconds, ' seconds')
+    anim = animation.ArtistAnimation(fig, ims, interval=1000/fps)
+    print('Saving video... (this can take some time for >10s simulations)')
+
+    t_stamp =  str(np.datetime64('now')).replace('-','').replace('T','_').replace(':', '')
+    pth = cfg.train_dir + "/" + cfg.experiment + f"/act-conv{lay+1}_" + t_stamp + ".gif"
+
+
+    anim.save(pth, fps=fps)
+    
+    # displaying in WandB
+    if cfg.with_wandb:
+        wandb.init(name=cfg.experiment, project='sample_factory', group='rfs')
+        wandb.log({"video": wandb.Video(pth, fps=35, format="gif")})
+        
+    print('Done!')

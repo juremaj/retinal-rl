@@ -64,7 +64,8 @@ def obs_to_img(obs):
 
 def simulate(cfg, env, actor_critic):
     device = torch.device('cpu' if cfg.device == 'cpu' else 'cuda')
-    
+    n_conv_lay = cfg.vvs_depth + 2 # vvs + input + bottelneck layer
+
     obs = env.reset() # this is the first observation when agent is spawned
     obs_torch = AttrDict(transform_dict_observations(obs))
     for key, x in obs_torch.items():
@@ -73,7 +74,7 @@ def simulate(cfg, env, actor_critic):
     # initialising rnn state and observation
     obs = env.reset() 
     rnn_states = torch.zeros([env.num_agents, get_hidden_size(cfg)], dtype=torch.float32, device=device) # this is how to initialize
-
+    
     # initialise matrices for saving outputs
     t_max = int(cfg.analyze_max_num_frames)
     all_img = np.zeros((cfg.res_h, cfg.res_w, 3, t_max)).astype(np.uint8)
@@ -82,12 +83,13 @@ def simulate(cfg, env, actor_critic):
     all_v_act = np.zeros(t_max)
     all_actions = np.zeros((2, t_max))
     all_health = np.zeros(t_max)
+    conv_acts = [ [] for _ in range(n_conv_lay) ]
 
     num_frames = 0 # counter
 
     with torch.no_grad():
         while t_max>num_frames:
-
+        
             policy_outputs = actor_critic(obs_torch, rnn_states, with_action_distribution=True)
             actions = policy_outputs.actions
             rnn_states = policy_outputs.rnn_states
@@ -106,6 +108,12 @@ def simulate(cfg, env, actor_critic):
             v_act = actor_critic.critic_linear(rnn_states).cpu().detach().numpy()
             actions = np.array(actions)
             health = env.unwrapped.get_info()['HEALTH'] # environment info (health etc.)
+            
+            enc = actor_critic.encoder.base_encoder            
+            for lay in range(n_conv_lay): 
+                    conv_act_torch = enc.conv_head[0:((lay+1)*2)](obs_torch['obs'])[0,:,:,:].permute(1, 2, 0)
+                    conv_act_np = conv_act_torch.cpu().detach().numpy()
+                    conv_acts[lay].append(conv_act_np)
 
             # saving
             all_img[:,:,:,num_frames] = img
@@ -114,6 +122,7 @@ def simulate(cfg, env, actor_critic):
             all_v_act[num_frames] = v_act
             all_actions[:,num_frames] = actions
             all_health[num_frames] = health
+            # conv acts is a list
 
             num_frames+=1
             if num_frames % int(t_max/10) == 0:
@@ -124,7 +133,8 @@ def simulate(cfg, env, actor_critic):
                    'all_rnn_act':all_rnn_act,
                    'all_v_act':all_v_act,
                    'all_actions':all_actions,
-                   'all_health':all_health}
+                   'all_health':all_health,
+                   'conv_acts': conv_acts}
 
     np.save(f'{os.getcwd()}/train_dir/{cfg.experiment}/analyze_out.npy', analyze_out, allow_pickle=True)
 
@@ -219,3 +229,14 @@ def pad_dataset(cfg, i, trainset, bck_np, offset): # i:index in dataset, bck_np:
     out_torch = torch.from_numpy(out_np[None,:,:,:]).float().to(device) 
     
     return out_torch
+
+def unroll_conv_acts(conv_acts, lay=1):
+    
+    acts = np.array(conv_acts[lay])
+    
+    n_px = acts.shape[1] * acts.shape[2] # new dimension after flattening pixels
+    n_ts = acts.shape[0]
+    n_ch = acts.shape[3]
+    
+    unroll_acts = acts.reshape(n_ts, n_px, n_ch)
+    return unroll_acts
