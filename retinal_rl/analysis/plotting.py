@@ -1,6 +1,5 @@
 from pygifsicle import optimize
 import imageio
-import numpy as np
 import torch
 from torch.utils import tensorboard
 import wandb
