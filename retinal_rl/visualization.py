@@ -60,6 +60,8 @@ def save_receptive_fields_plot(cfg,device,enc,lay,env):
     rwsmlt = 2 if flts > 8 else 1 # rows in rf subplot
     fltsdv = flts//rwsmlt
 
+    rf_dict = dict()
+
     fig, axs = plt.subplots(nchns*rwsmlt,fltsdv,dpi = 100,figsize=(6*fltsdv, 4*rwsmlt*nchns))
 
     for i in range(fltsdv):
@@ -93,6 +95,7 @@ def save_receptive_fields_plot(cfg,device,enc,lay,env):
                 if k == 0:
                     ax.set_title("Filter: " + str(flt), { 'weight' : 'bold' }, fontsize=12*rwsmlt)
 
+                rf_dict[f'lay{lay}_flt{flt}_pixch{k}'] = avg[k,:,:].tolist()
 
     t_stamp =  str(np.datetime64('now')).replace('-','').replace('T','_').replace(':', '')
 
@@ -110,6 +113,16 @@ def save_receptive_fields_plot(cfg,device,enc,lay,env):
     # saving
     pth = cfg.train_dir +  "/" + cfg.experiment + f"/rf-conv{lay}_" + t_stamp + ".png"
     plt.savefig(pth)
+
+    pth_npy = cfg.train_dir +  "/" + cfg.experiment + f"/rf-conv{lay}.npy"
+    np.save(pth_npy, rf_dict, allow_pickle=True)
+
+    # csv file
+    # pth_csv = cfg.train_dir +  "/" + cfg.experiment + f"/rf-conv{lay}.csv"
+    # with open('pth_csv', 'w') as csvfile:
+    #     writer = csv.DictWriter(csvfile, fieldnames = employee_info)
+    #     writer.writeheader()
+    #     writer.writerows(new_dict)
 
 def plot_all_rf(cfg, actor_critic, env):
     enc = actor_critic.encoder.base_encoder
