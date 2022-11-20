@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 from sklearn.decomposition import PCA
+from sklearn.linear_model import LogisticRegression
 
 import numpy as np
 
@@ -76,5 +77,30 @@ def get_stim_coll(all_health, health_dep=-8, death_dep=30):
 def row_zscore(mat):
     return (mat - np.mean(mat,1)[:,np.newaxis])/(np.std(mat,1)[:,np.newaxis]+1e-8)
 
+## linear decoder analysis
+def get_class_accuracy(cfg, ds_out, mode='multi', thr=5, permute=False):
+    # mode can be 'multi' or 'bin', thr determines threshold for binarisation, permute will randomly shuffle labels (to get chance preformance)
+
+    X = ds_out['all_fc_act'].T
+
+    if mode == 'multi':
+        y = ds_out['all_lab']
+    elif mode == 'bin':
+        y = ds_out['all_lab']<thr
+
+    perm_str = '' if not permute else 'permuted '
+
+    if permute:
+        y = np.random.permutation(y)
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+
+    logreg = LogisticRegression(max_iter=10000)
+    logreg.fit(X_train, y_train)
+
+    score_train = logreg.score(X_train, y_train)
+    score_test = logreg.score(X_test, y_test)
+
+    return f'{perm_str}{mode} classification scores:\n  -Train: {np.round(score_train,4)}\n  -Test: {np.round(score_test,4)}\n\n'
 
 

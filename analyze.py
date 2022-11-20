@@ -5,7 +5,7 @@ from retinal_rl.system.encoders import register_encoders
 from retinal_rl.system.parameters import custom_parse_args
 
 from retinal_rl.analysis.activations import get_env_ac, simulate, load_sim_out, get_acts_dataset, get_class_accuracy, unroll_conv_acts
-from retinal_rl.analysis.plotting import save_simulation_gif, plot_all_rf, plot_acts_tsne_stim, plot_dimred_ds_acts, plot_dimred_sim_acts, save_activations_gif
+from retinal_rl.analysis.plotting import save_simulation_gif, plot_all_rf, plot_acts_tsne_stim, plot_dimred_ds_acts, save_activations_gif
 
 def analyze(cfg):
     env, actor_critic = get_env_ac(cfg)
@@ -36,7 +36,9 @@ def analyze(cfg):
 
         for mode in ['multi', 'bin']:
             for permute in [False, True]:
-                get_class_accuracy(cfg, ds_out, mode=mode, permute=permute)
+                out_str = get_class_accuracy(cfg, ds_out, mode=mode, permute=permute)
+                print(out_str) # ADD SAVING THIS STRING
+
 
 def main():
     """Script entry point."""
