@@ -30,7 +30,7 @@ import time
 
 from filelock import FileLock, Timeout
 
-from retinal_rl.parameters import add_retinal_env_args,retinal_override_defaults
+from retinal_rl.system.parameters import add_retinal_env_args,retinal_override_defaults
 
 ### Core Retinal/Doom Environment ###
 

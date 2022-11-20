@@ -27,7 +27,7 @@ def save_simulation_gif(cfg, all_img):
 
     # displaying in WandB
     if cfg.with_wandb:
-        wandb.init(name=cfg.experiment, project='sample_factory', group='rfs')
+        wandb.init(name=cfg.experiment, project=cfg.wandb_project, group='rfs')
         wandb.log({"video": wandb.Video(pth, fps=35, format="gif")})
 
 def save_receptive_fields_plot(cfg,device,enc,lay,env):
@@ -105,7 +105,7 @@ def save_receptive_fields_plot(cfg,device,enc,lay,env):
 
     # displaying in WandB
     if cfg.with_wandb:
-        wandb.init(name=cfg.experiment, project='sample_factory', group='rfs')
+        wandb.init(name=cfg.experiment, project=cfg.wandb_project, group='rfs')
         wandb.log({f"rf-conv{lay}": fig})
 
     # saving
@@ -130,9 +130,6 @@ def plot_all_rf(cfg, actor_critic, env):
     n_conv_lay = len(enc.conv_head)//2
     for lay in range(1, n_conv_lay+1):
         save_receptive_fields_plot(cfg,device,enc,lay,env)
-
-    tsne_emb = tsne.fit(data.T)
-    return tsne_emb
 
 # for simulated experience
 def plot_acts_tsne_stim(cfg, acts, health, title): # plot sorted activations
@@ -159,7 +156,7 @@ def plot_acts_tsne_stim(cfg, acts, health, title): # plot sorted activations
 
     # displaying in WandB
     if cfg.with_wandb:
-        wandb.init(name=cfg.experiment, project='sample_factory', group='rfs')
+        wandb.init(name=cfg.experiment, project=cfg.wandb_project, group='rfs')
         wandb.log({f"acts_sorted_tsne_{title}_sim": fig})
 
     # saving
@@ -181,7 +178,7 @@ def plot_dimred(cfg, embedding, c, title='embedding'):
 
     # displaying in WandB
     if cfg.with_wandb:
-        wandb.init(name=cfg.experiment, project='sample_factory', group='rfs')
+        wandb.init(name=cfg.experiment, project=cfg.wandb_project, group='rfs')
         wandb.log({f"acts_{title}": wandb.Image(pth)})
 
 def plot_dimred_ds_acts(cfg, data, all_lab):
@@ -251,7 +248,7 @@ def save_activations_gif(cfg, imgs, conv_acts, lay, vscale=100):
 
     # displaying in WandB
     if cfg.with_wandb:
-        wandb.init(name=cfg.experiment, project='sample_factory', group='rfs')
+        wandb.init(name=cfg.experiment, project=cfg.wandb_project, group='rfs')
         wandb.log({"video": wandb.Video(pth, fps=35, format="gif")})
 
     print('Done!')
