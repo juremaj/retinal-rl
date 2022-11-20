@@ -4,7 +4,8 @@ from retinal_rl.system.environment import register_retinal_environment
 from retinal_rl.system.encoders import register_encoders
 from retinal_rl.system.parameters import custom_parse_args
 
-from retinal_rl.analysis.activations import get_env_ac, simulate, load_sim_out, get_acts_dataset, get_class_accuracy, unroll_conv_acts
+from retinal_rl.analysis.util import get_env_ac, simulate, load_sim_out, get_acts_dataset, unroll_conv_acts
+from retinal_rl.analysis.statistics import get_class_accuracy
 from retinal_rl.analysis.plotting import save_simulation_gif, plot_all_rf, plot_acts_tsne_stim, plot_dimred_ds_acts, save_activations_gif
 
 def analyze(cfg):
