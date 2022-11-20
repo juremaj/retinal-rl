@@ -8,9 +8,9 @@ python -m sample_factory_examples.enjoy_custom_env_custom_model --algo=APPO --en
 """
 
 import sys
-from retinal_rl.environment import register_retinal_environment
-from retinal_rl.parameters import custom_parse_args
-from retinal_rl.encoders import register_encoders
+from retinal_rl.system.environment import register_retinal_environment
+from retinal_rl.system.parameters import custom_parse_args
+from retinal_rl.system.encoders import register_encoders
 
 from sample_factory.run_algorithm import run_algorithm
 

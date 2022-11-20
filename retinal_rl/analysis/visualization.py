@@ -4,15 +4,13 @@ import numpy as np
 import torch
 from torch.utils import tensorboard
 import wandb
-from sklearn.decomposition import PCA
-
 from sample_factory.utils.utils import AttrDict
 from sample_factory.algorithms.appo.actor_worker import transform_dict_observations
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-from openTSNE import TSNE
+from retinal_rl.analysis.statistics import spike_triggered_average,fit_tsne_1d,fit_tsne,fit_pca,get_stim_coll,row_zscore
 
 
 def save_simulation_gif(cfg, all_img):
@@ -33,12 +31,12 @@ def save_simulation_gif(cfg, all_img):
         wandb.log({"video": wandb.Video(pth, fps=35, format="gif")})
 
 def save_receptive_fields_plot(cfg,device,enc,lay,env):
-    
+
     obs = env.reset() # this is the first observation when agent is spawned
     obs_torch = AttrDict(transform_dict_observations(obs))
     for key, x in obs_torch.items():
         obs_torch[key] = torch.from_numpy(x).to(device).float()
-    
+
     if cfg.greyscale:
         obs = obs_torch['obs'][:,0,None,:,:] # setting shape of observation to be only single channel
     else:
@@ -133,77 +131,23 @@ def plot_all_rf(cfg, actor_critic, env):
     for lay in range(1, n_conv_lay+1):
         save_receptive_fields_plot(cfg,device,enc,lay,env)
 
-def spike_triggered_average(dev,enc,lay,flt,rds,isz):
-
-    with torch.no_grad():
-
-        btchsz = [10000] + isz
-        cnty = (1+btchsz[2])//2
-        cntx = (1+btchsz[3])//2
-        mny = cnty - rds
-        mxy = cnty + rds
-        mnx = cntx - rds
-        mxx = cntx + rds
-        obsns = torch.randn(size=btchsz,device=dev)
-        outmtx = enc.conv_head[0:(lay*2)](obsns) #forward pass
-        outsz = outmtx.size()
-        outs = outmtx[:,flt,outsz[2]//2,outsz[3]//2].cpu()
-        obsns1 = obsns[:,:,mny:mxy,mnx:mxx].cpu()
-        avg = np.average(obsns1,axis=0,weights=outs)
-
-    return avg
-
-def fit_tsne_1d(data):
-    print('fitting 1d-tSNE...')
-    # default openTSNE params
-    tsne = TSNE(
-        n_components=1,
-        perplexity=30,
-        initialization="pca",
-        metric="euclidean",
-        n_jobs=8,
-        random_state=3,
-    )
-
-    tsne_emb = tsne.fit(data)
-    return tsne_emb
-
-def fit_tsne(data):
-    print('fitting tSNE...')
-    # default openTSNE params
-    tsne = TSNE(
-        perplexity=30,
-        initialization="pca",
-        metric="euclidean",
-        n_jobs=8,
-        random_state=3,
-    )
-
     tsne_emb = tsne.fit(data.T)
     return tsne_emb
 
-def fit_pca(data):
-    print('fitting PCA...')
-    pca=PCA()
-    pca.fit(data)
-    embedding = pca.components_.T
-    var_exp = pca.explained_variance_ratio_
-    return embedding, var_exp
-
 # for simulated experience
 def plot_acts_tsne_stim(cfg, acts, health, title): # plot sorted activations
-       
+
     # zscore
     data=row_zscore(acts)
     # get tSNE sorting and resort data
     embedding = fit_tsne_1d(data)
     temp = np.argsort(embedding[:,0])
     data = data[temp,:]
-    
+
     # get stimulus collection times
     pos_col = np.where(np.sign(get_stim_coll(health)) == 1)
     neg_col = np.where(np.sign(get_stim_coll(health)) == -1)
-    
+
     # plot
     fig = plt.figure(figsize=(10,3), dpi = 400)
     plt.imshow(data, cmap='bwr', interpolation='nearest', aspect='auto', vmin=-4, vmax=4)
@@ -212,7 +156,7 @@ def plot_acts_tsne_stim(cfg, acts, health, title): # plot sorted activations
     plt.xlabel('Time (stamps)')
     plt.ylabel(f'{title} unit id.')
     plt.title(f'Activations of {title} neurons')
-    
+
     # displaying in WandB
     if cfg.with_wandb:
         wandb.init(name=cfg.experiment, project='sample_factory', group='rfs')
@@ -223,26 +167,13 @@ def plot_acts_tsne_stim(cfg, acts, health, title): # plot sorted activations
     pth = cfg.train_dir +  "/" + cfg.experiment + f"/acts_sorted_tsne_{title}_sim_" + t_stamp + ".png"
     plt.savefig(pth)
 
-def get_stim_coll(all_health, health_dep=-8, death_dep=30):
-    
-    stim_coll = np.diff(all_health)
-    stim_coll[stim_coll == health_dep] = 0 # excluding 'hunger' decrease
-    stim_coll[stim_coll > death_dep] = 0 # excluding decrease due to death
-    stim_coll[stim_coll < -death_dep] = 0
-    return stim_coll
-
-# to plot library
-def row_zscore(mat):
-    return (mat - np.mean(mat,1)[:,np.newaxis])/(np.std(mat,1)[:,np.newaxis]+1e-8)
-
-
 # for dataset inputs
 def plot_dimred(cfg, embedding, c, title='embedding'):
     fig = plt.figure(figsize=(20,20))
     plt.scatter(embedding[:,0],embedding[:,1], s=5, c=c, cmap='jet')
     plt.colorbar()
     plt.axis('off')
-    
+
     # saving
     t_stamp =  str(np.datetime64('now')).replace('-','').replace('T','_').replace(':', '')
     pth = cfg.train_dir +  "/" + cfg.experiment + f"/acts_{title}_" + t_stamp + ".png"
@@ -254,7 +185,7 @@ def plot_dimred(cfg, embedding, c, title='embedding'):
         wandb.log({f"acts_{title}": wandb.Image(pth)})
 
 def plot_dimred_ds_acts(cfg, data, all_lab):
-    
+
     tsne_emb = fit_tsne(data)
     plot_dimred(cfg, tsne_emb, all_lab, title='tsne_FC_ds')
 
@@ -263,7 +194,7 @@ def plot_dimred_ds_acts(cfg, data, all_lab):
 
 # for simulation
 def plot_dimred_sim_acts(cfg, data, title=''):
-    
+
     t = np.arange(data.shape[1])
 
     tsne_emb = fit_tsne(data)
@@ -271,22 +202,22 @@ def plot_dimred_sim_acts(cfg, data, title=''):
 
     pca_emb,_ = fit_pca(data)
     plot_dimred(cfg, pca_emb, t, title=f'pca_{title}_sim')
-    
-def save_activations_gif(cfg, imgs, conv_acts, lay, vscale=100): 
+
+def save_activations_gif(cfg, imgs, conv_acts, lay, vscale=100):
 
     snapshots = np.asarray(conv_acts[lay])
     fps = 30
     nSeconds = round(len(snapshots)//fps)
 
     nflts = snapshots[0].shape[2]
-    rwsmlt = 2 if nflts > 8 else 1 # number of rows 
+    rwsmlt = 2 if nflts > 8 else 1 # number of rows
     fltsdv = nflts//rwsmlt + 1 # numer of clumns (+ 1 for rgb image)
-    
+
     fig, axs = plt.subplots(rwsmlt,fltsdv,dpi=1, figsize=(128*fltsdv, 72*rwsmlt))
-    
+
     ims = []
     vmaxs = [abs(snapshots[:,:,:,i]).max() for i in range(nflts)]
-    
+
     print(f'Visualising activations for conv{lay+1}')
     for t in range(fps*nSeconds):
         pts = []
@@ -296,11 +227,11 @@ def save_activations_gif(cfg, imgs, conv_acts, lay, vscale=100):
         ax = axs[1,0] if rwsmlt>1 else axs[0]
         ax.axis('off')
         pts.append(im)
-        
+
         flt=0 # counter
         for i in range(fltsdv-1):
             for j in range(rwsmlt):
-                
+
                 ax = axs[j, i+1] if rwsmlt>1 else axs[i+1]
                 im = ax.imshow(snapshots[t,:,:,flt], interpolation='none', aspect='auto', cmap='bwr', vmin=-vmaxs[j], vmax=vmaxs[j]) # plotting activations
                 flt +=1
@@ -317,10 +248,10 @@ def save_activations_gif(cfg, imgs, conv_acts, lay, vscale=100):
 
 
     anim.save(pth, fps=fps)
-    
+
     # displaying in WandB
     if cfg.with_wandb:
         wandb.init(name=cfg.experiment, project='sample_factory', group='rfs')
         wandb.log({"video": wandb.Video(pth, fps=35, format="gif")})
-        
+
     print('Done!')
