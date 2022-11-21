@@ -1,10 +1,12 @@
 from pygifsicle import optimize
+import os
 import imageio
 import torch
 from torch.utils import tensorboard
 import wandb
 from sample_factory.utils.utils import AttrDict
 from sample_factory.algorithms.appo.actor_worker import transform_dict_observations
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -57,7 +59,11 @@ def save_receptive_fields_plot(cfg,device,enc,lay,env):
     rwsmlt = 2 if flts > 8 else 1 # rows in rf subplot
     fltsdv = flts//rwsmlt
 
-    rf_dict = dict()
+    t_stamp =  str(np.datetime64('now')).replace('-','').replace('T','_').replace(':', '')
+    csv_dir = pth_csv = cfg.train_dir +  "/" + cfg.experiment + f"/rfs-{t_stamp}/"
+
+    if not os.path.exists(csv_dir):
+        os.mkdir(csv_dir)
 
     fig, axs = plt.subplots(nchns*rwsmlt,fltsdv,dpi = 100,figsize=(6*fltsdv, 4*rwsmlt*nchns))
 
@@ -85,16 +91,20 @@ def save_receptive_fields_plot(cfg,device,enc,lay,env):
                     ax=axs
 
                 ax.set_axis_off()
-                pnl = ax.imshow(avg[k,:,:],vmin=-vmx,vmax=vmx)
+                mtx = avg[k,:,:]
+                pnl = ax.imshow(mtx,vmin=-vmx,vmax=vmx)
                 cbar = fig.colorbar(pnl, ax=ax)
                 cbar.ax.tick_params(labelsize=12*rwsmlt)
 
                 if k == 0:
                     ax.set_title("Filter: " + str(flt), { 'weight' : 'bold' }, fontsize=12*rwsmlt)
 
-                rf_dict[f'lay{lay}_flt{flt}_pixch{k}'] = avg[k,:,:].tolist()
+                #rf_dict[f'lay{lay}_flt{flt}_pixch{k}'] = avg[k,:,:].tolist()
 
-    t_stamp =  str(np.datetime64('now')).replace('-','').replace('T','_').replace(':', '')
+                pth_csv = csv_dir + f"rf_lay{lay}_flt{flt}_pixch{k}.csv"
+                mtx_df = pd.DataFrame(mtx)
+                mtx_df.to_csv(pth_csv)
+                #np.save(pth_csv, rf_dict, allow_pickle=True)
 
     # displaying in tensorboard
     pth_tb = cfg.train_dir +  "/" + cfg.experiment + '/.summary/0/'
@@ -111,8 +121,6 @@ def save_receptive_fields_plot(cfg,device,enc,lay,env):
     pth = cfg.train_dir +  "/" + cfg.experiment + f"/rf-conv{lay}_" + t_stamp + ".png"
     plt.savefig(pth)
 
-    pth_npy = cfg.train_dir +  "/" + cfg.experiment + f"/rf-conv{lay}.npy"
-    np.save(pth_npy, rf_dict, allow_pickle=True)
 
     # csv file
     # pth_csv = cfg.train_dir +  "/" + cfg.experiment + f"/rf-conv{lay}.csv"
@@ -135,6 +143,7 @@ def plot_acts_tsne_stim(cfg, acts, health, title): # plot sorted activations
 
     # zscore
     data=row_zscore(acts)
+    #data=acts
     # get tSNE sorting and resort data
     embedding = fit_tsne_1d(data)
     temp = np.argsort(embedding[:,0])
@@ -146,7 +155,9 @@ def plot_acts_tsne_stim(cfg, acts, health, title): # plot sorted activations
 
     # plot
     fig = plt.figure(figsize=(10,3), dpi = 400)
+    #plt.imshow(data, cmap='bwr', interpolation='nearest', aspect='auto')
     plt.imshow(data, cmap='bwr', interpolation='nearest', aspect='auto', vmin=-4, vmax=4)
+    plt.colorbar()
     plt.vlines(pos_col, 0, data.shape[0], color='grey', linewidth=0.3, linestyle='--')
     plt.vlines(neg_col, 0, data.shape[0], color='black', linewidth=0.3, linestyle=':')
     plt.xlabel('Time (stamps)')
@@ -165,7 +176,7 @@ def plot_acts_tsne_stim(cfg, acts, health, title): # plot sorted activations
 
 # for dataset inputs
 def plot_dimred(cfg, embedding, c, title='embedding'):
-    fig = plt.figure(figsize=(20,20))
+    plt.figure(figsize=(20,20))
     plt.scatter(embedding[:,0],embedding[:,1], s=5, c=c, cmap='jet')
     plt.colorbar()
     plt.axis('off')
@@ -209,7 +220,7 @@ def save_activations_gif(cfg, imgs, conv_acts, lay, vscale=100):
     rwsmlt = 2 if nflts > 8 else 1 # number of rows
     fltsdv = nflts//rwsmlt + 1 # numer of clumns (+ 1 for rgb image)
 
-    fig, axs = plt.subplots(rwsmlt,fltsdv,dpi=1, figsize=(128*fltsdv, 72*rwsmlt))
+    fig, axs = plt.subplots(rwsmlt,fltsdv,dpi=1, figsize=(cfg.res_w*fltsdv, cfg.res_h*rwsmlt))
 
     ims = []
     vmaxs = [abs(snapshots[:,:,:,i]).max() for i in range(nflts)]

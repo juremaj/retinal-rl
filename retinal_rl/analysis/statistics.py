@@ -12,7 +12,7 @@ def spike_triggered_average(dev,enc,lay,flt,rds,isz):
 
     with torch.no_grad():
 
-        btchsz = [10000] + isz
+        btchsz = [25000] + isz
         cnty = (1+btchsz[2])//2
         cntx = (1+btchsz[3])//2
         mny = cnty - rds
