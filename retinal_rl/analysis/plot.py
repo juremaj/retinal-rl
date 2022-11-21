@@ -103,7 +103,7 @@ def save_receptive_fields_plot(cfg,device,enc,lay,env):
 
                 pth_csv = csv_dir + f"rf_lay{lay}_flt{flt}_pixch{k}.csv"
                 mtx_df = pd.DataFrame(mtx)
-                mtx_df.to_csv(pth_csv)
+                mtx_df.to_csv(pth_csv,header=False,index=False)
                 #np.save(pth_csv, rf_dict, allow_pickle=True)
 
     # displaying in tensorboard
