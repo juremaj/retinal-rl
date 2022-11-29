@@ -23,7 +23,7 @@ def analyze(cfg):
     plot_acts_tsne_stim(cfg, sim_out['all_rnn_act'], sim_out['all_health'], title='RNN')
 
     lay = 1 # for now we only care about bottleneck layer
-    save_activations_gif(cfg, sim_out['all_img'], sim_out['conv_acts'], lay, vscale=10)
+    # save_activations_gif(cfg, sim_out['all_img'], sim_out['conv_acts'], lay, vscale=10)
     unroll_acts = unroll_conv_acts(sim_out['conv_acts'], lay=lay)
     for ch in range (unroll_acts.shape[2]):
         plot_acts_tsne_stim(cfg, unroll_acts[:,:,ch].T, sim_out['all_health'], title=f'l{lay}_ch{ch}')

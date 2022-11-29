@@ -181,9 +181,14 @@ def obs_to_img(obs):
 def pad_dataset(cfg, i, trainset, bck_np, offset): # i:index in dataset, bck_np: numpy array of background (grass/sky), offset:determines position within background
     device = torch.device('cpu' if cfg.device == 'cpu' else 'cuda')
     in_im = trainset[i][0]
-    in_np = np.array(np.transpose(in_im, (2,0,1)))
+    if cfg.analyze_ds_name == 'CIFAR':
+        im_hw = 32
+        in_np = np.array(np.transpose(in_im, (2,0,1)))
+    elif cfg.analyze_ds_name == 'MNIST':
+        im_hw = 28
+        in_np = np.array(in_im)
     out_np = bck_np # background
-    out_np[:,offset[0]:offset[0]+32, offset[1]:offset[1]+32] = in_np # replacing pixels in the middle
+    out_np[:,offset[0]:offset[0]+im_hw, offset[1]:offset[1]+im_hw] = in_np # replacing pixels in the middle
     out_np_t = np.transpose(out_np, (1, 2, 0)) # reformatting for PIL conversion
     out_im = im.fromarray(out_np_t)
     out_torch = torch.from_numpy(out_np[None,:,:,:]).float().to(device)
