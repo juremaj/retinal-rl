@@ -148,8 +148,6 @@ def get_acts_dataset(cfg, actor_critic):
         rewards_dict = {0:0, 1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:9} # defined by the class-reward assignments in the .wad file (matching digits in case of mnist)
 
     n_stim = len(trainset)
-    offset = (28,50)
-
     all_fc_act = np.zeros((cfg.hidden_size, n_stim))
     all_img = np.zeros((cfg.res_h, cfg.res_w, 3, n_stim))
     all_lab = np.zeros(n_stim)
@@ -178,15 +176,17 @@ def obs_to_img(obs):
     img = np.transpose(img, (1,2,0))
     return img
 
-def pad_dataset(cfg, i, trainset, bck_np, offset): # i:index in dataset, bck_np: numpy array of background (grass/sky), offset:determines position within background
+def pad_dataset(cfg, i, trainset, bck_np): # i:index in dataset, bck_np: numpy array of background (grass/sky), offset:determines position within background
     device = torch.device('cpu' if cfg.device == 'cpu' else 'cuda')
     in_im = trainset[i][0]
     if cfg.analyze_ds_name == 'CIFAR':
         im_hw = 32
         in_np = np.array(np.transpose(in_im, (2,0,1)))
+        offset = (28,50)
     elif cfg.analyze_ds_name == 'MNIST':
         im_hw = 28
-        in_np = np.array(in_im)
+        in_np = np.array(in_im)*256 # originally they're normalized between 0 and 1
+        offset = (40,50)
     out_np = bck_np # background
     out_np[:,offset[0]:offset[0]+im_hw, offset[1]:offset[1]+im_hw] = in_np # replacing pixels in the middle
     out_np_t = np.transpose(out_np, (1, 2, 0)) # reformatting for PIL conversion
