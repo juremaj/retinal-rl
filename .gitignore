@@ -7,8 +7,9 @@ __pycache__/
 _vizdoom.ini
 train_dir
 train_dir_non-cosyne
-scenarios
-scenarios_non-cosyne
+scenarios_non-priority
+pytorch
+datasets
 
 # Nohup log (when running in background on compute servers)
 nohup*.out
