@@ -4,18 +4,19 @@ This documentation contains practical information about installation, training a
 
 ## Contents:
 
-### [Home](https://github.com/berenslab/retinal-rl/wiki)  
+## [Home](https://github.com/berenslab/retinal-rl/wiki)  
 > [Welcome](https://github.com/berenslab/retinal-rl/wiki#welcome)  
   
-### [Installation](https://github.com/berenslab/retinal-rl/wiki/Installation)
+## [Installation](https://github.com/berenslab/retinal-rl/wiki/Installation)
 > [General installation](https://github.com/berenslab/retinal-rl/wiki/Installation#general-installation)  
 
 > [Docker (internal)](https://github.com/berenslab/retinal-rl/wiki/Installation#docker-internal)  
 >> [Accessing nodes](https://github.com/berenslab/retinal-rl/wiki/Installation#accessing-nodes)  
 >> [Building a container](https://github.com/berenslab/retinal-rl/wiki/Installation#building-a-container)  
->> [Running TensorBoard](https://github.com/berenslab/retinal-rl/wiki/Installation#running-tensorboard)
+>> [Running TensorBoard](https://github.com/berenslab/retinal-rl/wiki/Installation#running-tensorboard)   
+>> [WandB](https://github.com/berenslab/retinal-rl/wiki/Installation#wandb)
 
-### [Creating ZDoom scenarios](https://github.com/berenslab/retinal-rl/wiki/Creating-ZDoom-scenarios)
+## [Creating ZDoom scenarios](https://github.com/berenslab/retinal-rl/wiki/Creating-ZDoom-scenarios)
 > [Introduction](https://github.com/berenslab/retinal-rl/wiki/Creating-ZDoom-scenarios#introduction) 
  
 > [SLADE 3](https://github.com/berenslab/retinal-rl/wiki/Creating-ZDoom-scenarios#slade-3)  
@@ -35,9 +36,24 @@ This documentation contains practical information about installation, training a
 
 > [Running in retinal-rl](https://github.com/berenslab/retinal-rl/wiki/Creating-ZDoom-scenarios#running-in-retinal-rl)  
 
-### [Training](https://github.com/berenslab/retinal-rl/wiki/Training)
+## [Scenarios overview](https://github.com/berenslab/retinal-rl/wiki/Scenarios-overview)
+> [Complexity scenarios](https://github.com/berenslab/retinal-rl/wiki/Scenarios-overview#complexity-scenarios)   
+>> [Apple and Gabor gathering](https://github.com/berenslab/retinal-rl/wiki/Scenarios-overview#apple-and-gabor-gathering)   
+>> [MNIST gathering](https://github.com/berenslab/retinal-rl/wiki/Scenarios-overview#mnist-gathering)   
+>> [CIFAR gathering](https://github.com/berenslab/retinal-rl/wiki/Scenarios-overview#cifar-gathering)   
 
-### [Analysis](https://github.com/berenslab/retinal-rl/wiki/Analysis)  
+> [Distractor scenarios](https://github.com/berenslab/retinal-rl/wiki/Scenarios-overview#distractor-scenarios)
+>> [APPCIFAR gathering](https://github.com/berenslab/retinal-rl/wiki/Scenarios-overview#appcifar-gathering)   
+>> [APPMNIST gathering](https://github.com/berenslab/retinal-rl/wiki/Scenarios-overview#appmnist-gathering)   
+
+> [Obstacle scenarios](https://github.com/berenslab/retinal-rl/wiki/Scenarios-overview#obstacle-scenarios)
+
+## [Training](https://github.com/berenslab/retinal-rl/wiki/Training)
+> [Training RL agents](https://github.com/berenslab/retinal-rl/wiki/Training#training-rl-agents)
+
+> [Training classification networks](https://github.com/berenslab/retinal-rl/wiki/Training#training-classification-networks)
+
+## [Analysis](https://github.com/berenslab/retinal-rl/wiki/Analysis)  
 > [General notes](https://github.com/berenslab/retinal-rl/wiki/Analysis#general-notes) 
  
 > [RF mapping](https://github.com/berenslab/retinal-rl/wiki/Analysis#rf-mapping)   
@@ -45,9 +61,15 @@ This documentation contains practical information about installation, training a
 > [Environment responses](https://github.com/berenslab/retinal-rl/wiki/Analysis#environment-responses)  
 >> [Conv layers](https://github.com/berenslab/retinal-rl/wiki/Analysis#conv-layers)  
 >> [FC layer](https://github.com/berenslab/retinal-rl/wiki/Analysis#fc-layer)  
->> [RNN layer](https://github.com/berenslab/retinal-rl/wiki/Analysis#rnn-layer)  
+>> [RNN layer](https://github.com/berenslab/retinal-rl/wiki/Analysis#rnn-layer)   
+>> [Attribution analysis (simulation)](https://github.com/berenslab/retinal-rl/wiki/Analysis#attribution-analysis-simulation)    
 
-> [Dataset responses](https://github.com/berenslab/retinal-rl/wiki/Analysis#dataset-responses)  
+> [Dataset responses](https://github.com/berenslab/retinal-rl/wiki/Analysis#dataset-responses)
+>> [Visualisation of encoder output](https://github.com/berenslab/retinal-rl/wiki/Analysis#visualisation-of-encoder-output)   
+>> [Classification (decoding) analysis](https://github.com/berenslab/retinal-rl/wiki/Analysis#classification-decoding-analysis)   
+>> [Attribution analysis (dataset)](https://github.com/berenslab/retinal-rl/wiki/Analysis#attribution-analysis-dataset)   
+>> [Action analysis](https://github.com/berenslab/retinal-rl/wiki/Analysis#action-analysis)
+
 
 
 <br />
