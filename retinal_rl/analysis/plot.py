@@ -372,24 +372,6 @@ def plot_violin_action(all_action, all_label):
         
     plt.show()
 
-def plot_fov_att_overlay_avg(att_out, in_image, show_att=True):
-    plt.plot(dpi=200)
-    
-    att_out_i = torch.mean(att_out,0)
-    vlim = np.max(np.abs(att_out_i.cpu().numpy()))
-
-    plt.title('avg')
-    plt.axis('off')
-    
-    if show_att:
-        im1 = plt.imshow(att_out_i.cpu(), alpha=0.3, cmap='seismic', vmin=-vlim/2, vmax=vlim/2)
-        fov_alpha = 0.5
-    else:
-        fov_alpha = 1
-        
-    im2 = plt.imshow(in_image.detach().numpy().transpose(1,2,0)/256, alpha=fov_alpha)
-
-    plt.show()
 
 def get_vlim_or_all_im(cfg, analyze_out, att_method, target, fixed_vlim=False, vlim_value=None):
     

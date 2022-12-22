@@ -27,6 +27,7 @@ from torch import nn
 from torch.utils.data import Dataset
 from torchvision import datasets, transforms
 
+from retinal_rl.system.encoders import LindseyEncoderBase
 # imports from sf required to refactor sf to 'pure pytorch'
 
 
@@ -286,6 +287,23 @@ def normalize_obs_torch(obs_torch, cfg):
         if abs(scale - 1.0) > EPS:
             obs_torch.mul_(1.0 / scale)
 
+class LindseyClassificationEncoder(LindseyEncoderBase): # this is almost the same class definition as LindseyEncoder with only two small additions (*)
+
+    def __init__(self, cfg, obs_space,timing):
+
+        super().__init__(cfg,obs_space,timing)
+        self.base_encoder = LindseyEncoderBase(cfg,obs_space,timing)
+        self.fc_out = nn.Linear(self.encoder_out_size,10) # (*) addition for classification
+        print(self)
+
+    def forward(self, obs_dict):
+        # we always work with dictionary observations. Primary observation is available with the key 'obs'
+        main_obs = obs_dict#['obs']
+
+        # forward pass through configurable fully connected blocks immediately after the encoder
+        x = self.base_encoder(main_obs)
+        x = self.fc_out(x) # (*) addition for classification
+        return x
 
 # this one is re-defined here to overwrite the original version from the library
 def pad_dataset_attribution(cfg, i, trainset, bck_np, downs_fact=1, mnist_offset=(50,46)): # i:index in dataset, bck_np: numpy array of background (grass/sky), offset:determines position within background
